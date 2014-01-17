@@ -49,11 +49,6 @@ public class CreateListener implements Listener {
 			}
 		}
 		
-		// prevent regular usage
-		if (Settings.preventShopCreationItemRegularUsage && !player.isOp() && !player.hasPermission("shopkeeper.bypass")) {
-			event.setUseItemInHand(Result.DENY);
-		}
-		
 		// check for player shop spawn
 		String playerName = player.getName();
 		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
@@ -169,7 +164,18 @@ public class CreateListener implements Listener {
 						}
 					}
 				}
+			} else { 
+				// selected a location without a chest selected
+				plugin.sendMessage(player, Settings.msgMustSelectChest);
 			}
+
+			// prevent regular usage (do this last because otherwise the setcancel can interfere with logic above
+			if (Settings.preventShopCreationItemRegularUsage && !player.isOp() && !player.hasPermission("shopkeeper.bypass")) {
+				ShopkeepersPlugin.debug("preventing normal shop creation item usage");
+				// event.setUseItemInHand(Result.DENY); // no longer seems to work
+				event.setCancelled(true);
+			}
+			
 		}
 	}
 	
