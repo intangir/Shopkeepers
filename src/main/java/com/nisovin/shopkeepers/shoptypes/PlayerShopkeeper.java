@@ -1,8 +1,10 @@
 package com.nisovin.shopkeepers.shoptypes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -135,6 +137,43 @@ public abstract class PlayerShopkeeper extends Shopkeeper {
 	}
 
 	/**
+	* Checks whether the chest that the shopkeeper uses still exists.
+	* @param chest the chest to check
+	* @return
+	*/
+	public boolean isChestIntact() {
+		Block chest = Bukkit.getWorld(world).getBlockAt(chestx, chesty, chestz);
+		return (chest.getType() == Material.CHEST);
+	}
+	
+	// allow vulnerability if conditions are such 
+	@Override
+	public boolean isInvulnerable() {
+		return (isChestIntact() || !Settings.killableAfterLosingChest);
+	}
+
+	// allows you to view the chest inventory through the shopkeeper
+	@Override
+	public boolean onOpenInventory(final Player player) {
+		if ((player.getName().equalsIgnoreCase(owner) && player.hasPermission("shopkeeper." + getType().getPermission())) || player.hasPermission("shopkeeper.bypass")) {
+
+			Block block = Bukkit.getWorld(world).getBlockAt(chestx, chesty, chestz);
+			if (block.getType() == Material.CHEST) {
+				ShopkeepersPlugin.debug("found chest");
+				final Chest chest = (Chest) block.getState();
+				Bukkit.getScheduler().scheduleSyncDelayedTask(ShopkeepersPlugin.getInstance(), new Runnable() {
+					public void run() {
+						player.openInventory(chest.getInventory());
+						ShopkeepersPlugin.debug("opening inventory");
+					}
+				}, 2);
+				return true;
+			}
+		} 
+		return false;
+	}
+
+	/**
 	 * Called when a player shift-right-clicks on the player shopkeeper villager in an attempt to edit
 	 * the shopkeeper information. This method should open the editing interface. The permission and owner
 	 * check has already occurred before this is called.
@@ -244,7 +283,19 @@ public abstract class PlayerShopkeeper extends Shopkeeper {
 			recipe[0] = new ItemStack(Settings.currencyItem, cost, Settings.currencyItemData);
 		}
 	}
-	
+
+	// tweak buttons depending on playershop button settings
+	@Override
+	protected void setActionButtons(Inventory inv) {
+		super.setActionButtons(inv);
+
+		if (Settings.enablePlayerShopInventory && isChestIntact()) {
+			inv.setItem(8, createItemStackWithName(Settings.inventoryItem, 0, Settings.msgButtonInv, Settings.msgButtonInvTip));
+		} else if (!Settings.enablePlayerShopSetName) {
+			inv.setItem(8, null);
+		}
+	}
+
 	protected void setEditColumnCost(Inventory inv, int column, int cost) {
 		if (cost > 0) {
 			if (Settings.highCurrencyItem != Material.AIR && cost > Settings.highCurrencyMinCost) {

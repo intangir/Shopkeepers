@@ -30,6 +30,11 @@ public enum EditorClickResult {
 	/**
 	 * Delete this shopkeeper and save.
 	 */
-	DELETE_SHOPKEEPER
+	DELETE_SHOPKEEPER,
 	
+	/**
+	 * access the connected inventory for this shopkeeper.
+	 */
+	ACCESS_INVENTORY
+
 }

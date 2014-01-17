@@ -1,5 +1,6 @@
 package com.nisovin.shopkeepers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -193,6 +194,24 @@ public abstract class Shopkeeper {
 	public abstract boolean onEdit(Player player);
 	
 	/**
+	 * Called when a player clicks the chest in the inventory editor
+	 * allows the owner to view his chests inventory through the shopkeeper
+	 * @param player the player doing the edit
+	 * @return whether the player is now editing (returns false if permission fails)
+	 */
+	public boolean onOpenInventory(Player player) {
+		return false;
+	}
+
+	/**
+	 * Called when a shopkeeper is attacked to determine if he is vulnerable 
+	 * @return whether the shopkeeper is now protected or not (returns false if he should be damaged)
+	 */
+	public boolean isInvulnerable() {
+		return true;
+	}
+
+	/**
 	 * Called when a player clicks on any slot in the editor window.
 	 * @param event the click event
 	 * @return how the main plugin should handle the click
@@ -200,10 +219,20 @@ public abstract class Shopkeeper {
 	public EditorClickResult onEditorClick(InventoryClickEvent event) {
 		// check for special buttons
 		if (event.getRawSlot() == 8) {
-			// it's the name button - ask for new name
-			event.setCancelled(true);
-			saveEditor(event.getInventory(), (Player)event.getWhoClicked());
-			return EditorClickResult.SET_NAME;
+			Material slotType = event.getInventory().getItem(8).getType(); 
+			if (slotType == Settings.nameItem) {
+				// it's the name button - ask for new name
+				event.setCancelled(true);
+				saveEditor(event.getInventory(), (Player)event.getWhoClicked());
+				return EditorClickResult.SET_NAME;
+			} else if (slotType == Settings.inventoryItem) {
+				// it's the inventory button - open the inventory
+				event.setCancelled(true);
+				saveEditor(event.getInventory(), (Player)event.getWhoClicked());
+				return EditorClickResult.ACCESS_INVENTORY;
+			} else {
+				return EditorClickResult.NOTHING;
+			}
 		} else if (event.getRawSlot() == 17) {
 			// it's the cycle button - cycle to next type
 			if (event.getCursor() != null && event.getCursor().getType() != Material.AIR) {
@@ -212,7 +241,7 @@ public abstract class Shopkeeper {
 				shopObject.cycleType();
 				ItemStack typeItem = shopObject.getTypeItem();
 				if (typeItem != null) {
-					event.getInventory().setItem(17, setItemStackName(typeItem, Settings.msgButtonType));
+					event.getInventory().setItem(17, setItemStackName(typeItem, Settings.msgButtonType, Settings.msgButtonTypeTip));
 				}
 			}
 			event.setCancelled(true);
@@ -267,25 +296,27 @@ public abstract class Shopkeeper {
 	}
 	
 	protected void setActionButtons(Inventory inv) {
-		inv.setItem(8, createItemStackWithName(Settings.nameItem, Settings.msgButtonName));
+		inv.setItem(8, createItemStackWithName(Settings.nameItem, 0, Settings.msgButtonName, Settings.msgButtonNameTip));
 		ItemStack typeItem = shopObject.getTypeItem();
 		if (typeItem != null) {
-			inv.setItem(17, setItemStackName(typeItem, Settings.msgButtonType));
+			inv.setItem(17, setItemStackName(typeItem, Settings.msgButtonType, Settings.msgButtonTypeTip));
 		}
-		inv.setItem(26, createItemStackWithName(Settings.deleteItem, Settings.msgButtonDelete));
+		inv.setItem(26, createItemStackWithName(Settings.deleteItem, Settings.deleteItemData, Settings.msgButtonDelete, Settings.msgButtonDeleteTip));
 	}
 	
-	protected ItemStack createItemStackWithName(Material type, String name) {
-		ItemStack item = new ItemStack(type, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-		item.setItemMeta(meta);
-		return item;
+	protected ItemStack createItemStackWithName(Material type, int data, String name, String lore) {
+		ItemStack item = new ItemStack(type, 1, (short) data);
+		return setItemStackName(item, name, lore);
 	}
 	
-	protected ItemStack setItemStackName(ItemStack item, String name) {
+	protected ItemStack setItemStackName(ItemStack item, String name, String lore) {
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+		ArrayList<String> lores = new ArrayList<String>();
+		for(String loreline: lore.split("\n")) {
+			lores.add(ChatColor.translateAlternateColorCodes('&', loreline));
+		}
+		meta.setLore(lores);
 		item.setItemMeta(meta);
 		return item;
 	}

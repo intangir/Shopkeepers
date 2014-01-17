@@ -25,6 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -126,13 +127,19 @@ class ShopListener implements Listener {
 						
 						// save
 						plugin.save();
-					} else if (result == EditorClickResult.DONE_EDITING) {
+					} else if (result == EditorClickResult.DONE_EDITING || result == EditorClickResult.ACCESS_INVENTORY) {
 						// end the editing session
 						plugin.closeTradingForShopkeeper(id);						
 						// run event
 						Bukkit.getPluginManager().callEvent(new ShopkeeperEditedEvent((Player)event.getWhoClicked(), shopkeeper));
 						// save
 						plugin.save();
+
+						if(result == EditorClickResult.ACCESS_INVENTORY) {
+							// let the owner access the shopkeepers chest inventory
+							shopkeeper.onOpenInventory((Player)event.getWhoClicked());
+						}
+						
 					} else if (result == EditorClickResult.SAVE_AND_CONTINUE) {						
 						// run event
 						Bukkit.getPluginManager().callEvent(new ShopkeeperEditedEvent((Player)event.getWhoClicked(), shopkeeper));
@@ -331,8 +338,9 @@ class ShopListener implements Listener {
 
 	@EventHandler
 	void onEntityDamage(EntityDamageEvent event) {
-		// don't allow damaging shopkeepers!
-		if (plugin.activeShopkeepers.containsKey("entity" + event.getEntity().getEntityId())) {
+		// don't allow damaging shopkeepers unless vulnerable
+		Shopkeeper shopkeeper = plugin.activeShopkeepers.get("entity" + event.getEntity().getEntityId());
+		if (shopkeeper != null && shopkeeper.isInvulnerable()) {
 			event.setCancelled(true);
 			if (event instanceof EntityDamageByEntityEvent) {
 				EntityDamageByEntityEvent evt = (EntityDamageByEntityEvent)event;
@@ -340,6 +348,17 @@ class ShopListener implements Listener {
 					evt.getDamager().remove();
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	void onEntityDeath(EntityDeathEvent event) {
+		// don't allow killing shopkeepers unless vulnerable
+		Shopkeeper shopkeeper = plugin.activeShopkeepers.get("entity" + event.getEntity().getEntityId());
+		if (shopkeeper != null && !shopkeeper.isInvulnerable()) {
+			plugin.activeShopkeepers.remove(shopkeeper.getId());
+			plugin.allShopkeepersByChunk.get(shopkeeper.getChunk()).remove(shopkeeper);
+			plugin.save();
 		}
 	}
 

@@ -21,10 +21,12 @@ public class Settings {
 	public static boolean enableTownyRestrictions = false;	
 	
 	public static boolean requireChestRecentlyPlaced = true;
+	public static boolean requireChestAccess = true;
 	public static boolean createPlayerShopWithCommand = false;
 	public static boolean simulateRightClickOnCommand = true;
 	public static boolean protectChests = true;
 	public static boolean deleteShopkeeperOnBreakChest = false;
+	public static boolean killableAfterLosingChest = false;
 	public static int maxShopsPerPlayer = 0;
 	public static String maxShopsPermOptions = "10,15,25";
 	public static int maxChestDistance = 15;
@@ -54,9 +56,14 @@ public class Settings {
 	//public static boolean enableBlockShops = true;
 	//public static int blockShopType = 0;
 
+	public static boolean enablePlayerShopSetName = true;
+	public static boolean enablePlayerShopInventory = false;
+
 	public static String editorTitle = "Shopkeeper Editor";
 	public static Material nameItem = Material.ANVIL;
+	public static Material inventoryItem = Material.CHEST;
 	public static Material deleteItem = Material.FIRE;
+	public static int deleteItemData = 0;
 	
 	public static Material hireItem = Material.EMERALD;
 	public static int hireOtherVillagersCosts = 1;
@@ -75,9 +82,14 @@ public class Settings {
 	public static int highCurrencyMinCost = 20;
 	public static Material highZeroItem = Material.SLIME_BALL;
 	
+	public static String msgButtonInv = "&aView Inventory";
+	public static String msgButtonInvTip = "lets you view the inventory\nyour shopkeeper is using";
 	public static String msgButtonName = "&aSet Shop Name";
+	public static String msgButtonNameTip = "lets you rename\nyour shopkeeper";
 	public static String msgButtonType = "&aChoose Appearance";
+	public static String msgButtonTypeTip = "changes the look\nof your shopkeeper";
 	public static String msgButtonDelete = "&4Delete";
+	public static String msgButtonDeleteTip = "close this shop\nremove shopkeeper";
 	public static String msgButtonHire = "&aHire";
 	
 	public static String msgSelectedNormalShop = "&aNormal shopkeeper selected (sells items to players).";
@@ -94,6 +106,7 @@ public class Settings {
 	public static String msgMustSelectChest = "&aYou must right-click a chest before placing your shopkeeper.";
 	public static String msgChestTooFar = "&aThe shopkeeper's chest is too far away!";
 	public static String msgChestNotPlaced = "&aYou must select a chest you have recently placed.";
+	public static String msgChestNotAccessible = "&aYou must select a chest that you have access to.";
 	public static String msgTypeNewName = "&aPlease type the shop's name into the chat.\n  &aType a dash (-) to remove the name.";
 	public static String msgNameSet = "&aThe shop's name has been set!";
 	public static String msgNameInvalid = "&aThat name is not valid!";

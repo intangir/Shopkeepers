@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Attachable;
+import com.nisovin.shopkeepers.events.TestPlayerInteractEvent;
 
 import com.nisovin.shopkeepers.shopobjects.ShopObject;
 
@@ -32,6 +33,7 @@ public class CreateListener implements Listener {
 	@EventHandler(priority=EventPriority.HIGH)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) return;
+		if (event instanceof TestPlayerInteractEvent) return;
 		
 		// get player, ignore creative mode
 		final Player player = event.getPlayer();
@@ -95,6 +97,16 @@ public class CreateListener implements Listener {
 					if (Settings.requireChestRecentlyPlaced && (list == null || !list.contains(block.getWorld().getName() + "," + block.getX() + "," + block.getY() + "," + block.getZ()))) {
 						// chest not recently placed
 						plugin.sendMessage(player, Settings.msgChestNotPlaced);
+					} else if (Settings.requireChestAccess) {
+						// check that you can actually access the chest (incase its protected by another mod)
+						PlayerInteractEvent testEvent = new TestPlayerInteractEvent(player, event.getAction(), inHand, block, event.getBlockFace());
+						plugin.getServer().getPluginManager().callEvent(testEvent);
+						if (testEvent.isCancelled()) {
+							plugin.sendMessage(player, Settings.msgChestNotAccessible);
+						} else {
+							plugin.selectedChest.put(playerName, event.getClickedBlock());
+							plugin.sendMessage(player, Settings.msgSelectedChest);
+						}
 					} else {
 						// select chest
 						plugin.selectedChest.put(playerName, event.getClickedBlock());
