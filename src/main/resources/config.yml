@@ -16,7 +16,7 @@ require-chest-recently-placed: true
 require-chest-access: true
 protect-chests: true
 delete-shopkeeper-on-break-chest: false
-killable-after-losing-chest: true
+killable-after-losing-chest: false
 max-shops-per-player: 0
 max-shops-perm-options: 5,15,25
 max-chest-distance: 15
@@ -140,3 +140,4 @@ msg-admin-shop-created: |
     &aRight-click the shop while sneaking to modify trades.
 
 debug: false
+

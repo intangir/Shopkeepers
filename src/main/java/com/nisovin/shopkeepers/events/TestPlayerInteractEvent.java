@@ -13,8 +13,8 @@ import org.bukkit.block.BlockFace;
  */
 public class TestPlayerInteractEvent extends PlayerInteractEvent
 {
-    public TestPlayerInteractEvent(Player who, Action action, ItemStack item, Block clickedBlock, BlockFace clickedFace)
-    {
-        super(who, action, item, clickedBlock, clickedFace);
-    }
+	public TestPlayerInteractEvent(Player who, Action action, ItemStack item, Block clickedBlock, BlockFace clickedFace)
+	{
+		super(who, action, item, clickedBlock, clickedFace);
+	}
 }
