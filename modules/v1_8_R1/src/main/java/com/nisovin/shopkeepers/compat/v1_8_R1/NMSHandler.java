@@ -1,17 +1,17 @@
-package com.nisovin.shopkeepers.compat.v1_7_R3;
+package com.nisovin.shopkeepers.compat.v1_8_R1;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.bukkit.craftbukkit.v1_7_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_7_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_7_R3.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 
-import net.minecraft.server.v1_7_R3.*;
+import net.minecraft.server.v1_8_R1.*;
 
 import com.nisovin.shopkeepers.Shopkeeper;
 import com.nisovin.shopkeepers.compat.api.NMSCallProvider;
@@ -25,9 +25,15 @@ public final class NMSHandler implements NMSCallProvider {
 			EntityVillager villager = new EntityVillager(((CraftPlayer) player).getHandle().world, 0);
 			if (name != null && !name.isEmpty()) {
 				villager.setCustomName(name);
+			} else {
+				villager.setCustomName("Shopkeeper");
 			}
+			// career level (to prevent trade progression):
+			Field careerLevelField = EntityVillager.class.getDeclaredField("bw");
+			careerLevelField.setAccessible(true);
+			careerLevelField.set(villager, 10);
 
-			Field recipeListField = EntityVillager.class.getDeclaredField("bu");
+			Field recipeListField = EntityVillager.class.getDeclaredField("bp");
 			recipeListField.setAccessible(true);
 			MerchantRecipeList recipeList = (MerchantRecipeList) recipeListField.get(villager);
 			if (recipeList == null) {
@@ -42,7 +48,10 @@ public final class NMSHandler implements NMSCallProvider {
 			// this will trigger the "create child" code of minecraft when the player is holding a spawn egg in his hands,
 			// but bypasses craftbukkits interact events and therefore removes the spawn egg from the players hands
 			// result: we have to prevent openTradeWindow if the shopkeeper entity is being clicking with a spawn egg in hands
-			villager.a(((CraftPlayer) player).getHandle());
+			// villager.a(((CraftPlayer) player).getHandle());
+			villager.a_(((CraftPlayer) player).getHandle()); // set trading player
+			((CraftPlayer) player).getHandle().openTrade(villager); // open trade window
+			((CraftPlayer) player).getHandle().b(StatisticList.F); // minecraft statistics
 
 			return true;
 		} catch (Exception e) {
@@ -116,19 +125,48 @@ public final class NMSHandler implements NMSCallProvider {
 	private MerchantRecipe createMerchantRecipe(org.bukkit.inventory.ItemStack item1, org.bukkit.inventory.ItemStack item2, org.bukkit.inventory.ItemStack item3) {
 		MerchantRecipe recipe = new MerchantRecipe(convertItemStack(item1), convertItemStack(item2), convertItemStack(item3));
 		try {
+			// max uses:
 			Field maxUsesField = MerchantRecipe.class.getDeclaredField("maxUses");
 			maxUsesField.setAccessible(true);
 			maxUsesField.set(recipe, 10000);
+			// reward exp:
+			Field rewardExpField = MerchantRecipe.class.getDeclaredField("rewardExp");
+			rewardExpField.setAccessible(true);
+			rewardExpField.set(recipe, false);
 		} catch (Exception e) {
 		}
 		return recipe;
 	}
 
-	private net.minecraft.server.v1_7_R3.ItemStack convertItemStack(org.bukkit.inventory.ItemStack item) {
+	private net.minecraft.server.v1_8_R1.ItemStack convertItemStack(org.bukkit.inventory.ItemStack item) {
 		if (item == null) return null;
-		return org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack.asNMSCopy(item);
+		return org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack.asNMSCopy(item);
 	}
 	
+	private NBTTagCompound getItemTag(net.minecraft.server.v1_8_R1.ItemStack itemStack) {
+		if (itemStack == null) return null;
+		try {
+			Field tag = itemStack.getClass().getDeclaredField("tag");
+			tag.setAccessible(true);
+			return (NBTTagCompound) tag.get(itemStack);
+		} catch (NoSuchFieldException e) {
+			return null;
+		} catch (IllegalAccessException e2) {
+			return null;
+		}
+	}
+
+	private void setItemTag(net.minecraft.server.v1_8_R1.ItemStack itemStack, NBTTagCompound newTag) {
+		if (itemStack == null) return;
+		try {
+			Field tag = itemStack.getClass().getDeclaredField("tag");
+			tag.setAccessible(true);
+			tag.set(itemStack, newTag);
+		} catch (NoSuchFieldException e) {
+		} catch (IllegalAccessException e2) {
+		}
+	}
+
 	@Override
 	public org.bukkit.inventory.ItemStack loadItemAttributesFromString(org.bukkit.inventory.ItemStack item, String data) {
 		NBTTagList list = new NBTTagList();
@@ -146,21 +184,26 @@ public final class NMSHandler implements NMSCallProvider {
 				list.add(attr);
 			}
 		}
-		net.minecraft.server.v1_7_R3.ItemStack i = CraftItemStack.asNMSCopy(item);
-		if (i.tag == null) i.tag = new NBTTagCompound();
-		i.tag.set("AttributeModifiers", list);
+		net.minecraft.server.v1_8_R1.ItemStack i = CraftItemStack.asNMSCopy(item);
+		NBTTagCompound tag = this.getItemTag(i);
+		if (tag == null) {
+			tag = new NBTTagCompound();
+			this.setItemTag(i, tag);
+		}
+		tag.set("AttributeModifiers", list);
 		return CraftItemStack.asBukkitCopy(i);
 	}
 
 	@Override
 	public String saveItemAttributesToString(org.bukkit.inventory.ItemStack item) {
-		net.minecraft.server.v1_7_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+		net.minecraft.server.v1_8_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
 		if (nmsItem == null) return null;
-		if (nmsItem.tag == null || !nmsItem.tag.hasKey("AttributeModifiers")) {
+		NBTTagCompound tag = this.getItemTag(nmsItem);
+		if (tag == null || !tag.hasKey("AttributeModifiers")) {
 			return null;
 		}
 		String data = "";
-		NBTTagList list = nmsItem.tag.getList("AttributeModifiers", 10);
+		NBTTagList list = tag.getList("AttributeModifiers", 10);
 		for (int i = 0; i < list.size(); i++) {
 			NBTTagCompound attr = list.get(i);
 			data += attr.getString("Name") + "," 

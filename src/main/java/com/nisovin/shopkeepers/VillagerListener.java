@@ -39,14 +39,14 @@ public class VillagerListener implements Listener {
 				if (Settings.hireOtherVillagers) {
 					// allow hiring of other villagers
 					ShopkeepersPlugin.debug("  Non-shopkeeper, trade prevented, but possible hire");
-					plugin.handleHireOtherVillager(event.getPlayer(), villager);
+					plugin.handleHireOtherNpc(event.getPlayer(), villager);
 				} else {
 					ShopkeepersPlugin.debug("  Non-shopkeeper, trade prevented");
 				}
 			} else if (Settings.hireOtherVillagers) {
 				// allow hiring of other villagers
 				ShopkeepersPlugin.debug("  Non-shopkeeper, possible hire");
-				if (plugin.handleHireOtherVillager(event.getPlayer(), villager)) {
+				if (plugin.handleHireOtherNpc(event.getPlayer(), villager)) {
 					// hiring was successful -> prevent trading
 					ShopkeepersPlugin.debug("  Non-shopkeeper, possible hire.. success -> possible trade prevented");
 					event.setCancelled(true); 

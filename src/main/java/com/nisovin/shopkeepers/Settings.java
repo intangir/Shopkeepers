@@ -11,6 +11,7 @@ public class Settings {
 	
 	public static boolean disableOtherVillagers = true;
 	public static boolean hireOtherVillagers = false;
+	public static boolean hireOtherSnowGolems = false;
 	public static boolean blockVillagerSpawns = false;
 	public static boolean enableSpawnVerifier = false;
 	public static boolean bypassSpawnBlocking = true;
@@ -22,6 +23,7 @@ public class Settings {
 	
 	public static boolean requireChestRecentlyPlaced = true;
 	public static boolean requireChestAccess = true;
+	public static boolean requireEntityAccess = true;
 	public static boolean createPlayerShopWithCommand = false;
 	public static boolean simulateRightClickOnCommand = true;
 	public static boolean protectChests = true;
@@ -46,6 +48,7 @@ public class Settings {
 	public static boolean enableSignShops = true;
 	public static boolean enableWitchShops = true;
 	public static boolean enableCreeperShops = false;
+	public static boolean enableSnowGolemShops = false;
 	
 	public static String signShopFirstLine = "[SHOP]";
 	public static boolean showNameplates = true;
@@ -101,6 +104,7 @@ public class Settings {
 	public static String msgSelectedSignShop = "&aSign shop selected.";
 	public static String msgSelectedWitchShop = "&aWitch shop selected.";
 	public static String msgSelectedCreeperShop = "&aCreeper shop selected.";
+	public static String msgSelectedSnowGolemShop = "&aSnow Golem shop selected.";
 	
 	public static String msgSelectedChest = "&aChest selected! Right click a block to place your shopkeeper.";
 	public static String msgMustSelectChest = "&aYou must right-click a chest before placing your shopkeeper.";

@@ -17,9 +17,11 @@ public enum ShopObjectType {
 	
 	WITCH(3, "witch"),
 	
-	CREEPER(4, "creeper");
+	CREEPER(4, "creeper"),
 	
-	private static final int MAX_ID = 4;
+	SNOWGOLEM(5, "snowgolem");
+	
+	private static final int MAX_ID = 5;
 	
 	private final int id;
 	private final String permission;
@@ -50,6 +52,8 @@ public enum ShopObjectType {
 			return new WitchShop();
 		} else if (id == 4) {
 			return new CreeperShop();
+		} else if (id == 5) {
+			return new SnowGolemShop();
 		} else {
 			return null;
 		}
@@ -84,6 +88,8 @@ public enum ShopObjectType {
 				else if (next == SIGN && !Settings.enableSignShops)
 					continue;
 				else if (next == CREEPER && !Settings.enableCreeperShops)
+					continue;
+				else if (next == SNOWGOLEM && !Settings.enableSnowGolemShops)
 					continue;
 				return next;
 			}

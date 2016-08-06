@@ -66,6 +66,8 @@ public class CreateListener implements Listener {
 						plugin.sendMessage(player, Settings.msgSelectedSignShop);
 					} else if (shopObjectType == ShopObjectType.WITCH) {
 						plugin.sendMessage(player, Settings.msgSelectedWitchShop);
+					} else if (shopObjectType == ShopObjectType.SNOWGOLEM) {
+						plugin.sendMessage(player, Settings.msgSelectedSnowGolemShop);
 					} else if (shopObjectType == ShopObjectType.CREEPER) {
 						plugin.sendMessage(player, Settings.msgSelectedCreeperShop);
 					}
@@ -146,6 +148,7 @@ public class CreateListener implements Listener {
 									// perform special setup
 									if (objType == ShopObjectType.SIGN) {
 										// set sign
+										shopkeeper.setName("testing");
 										sign.setType(Material.WALL_SIGN);
 										Sign signState = (Sign)sign.getState();
 										((Attachable)signState.getData()).setFacingDirection(event.getBlockFace());

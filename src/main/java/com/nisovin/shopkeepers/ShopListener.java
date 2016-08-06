@@ -114,7 +114,7 @@ class ShopListener implements Listener {
 							ItemStack creationItem = Settings.createCreationItem();
 							HashMap<Integer, ItemStack> remaining = event.getWhoClicked().getInventory().addItem(creationItem);
 							if (!remaining.isEmpty()) {
-								event.getWhoClicked().getWorld().dropItem(shopkeeper.getActualLocation(), creationItem);
+								event.getWhoClicked().getWorld().dropItem(event.getWhoClicked().getLocation(), creationItem);
 							}
 						}
 						

@@ -70,3 +70,6 @@ permissions:
     shopkeeper.creeper:
         description: Create a creeper shopkeeper
         default: true
+    shopkeeper.snowgolem:
+        description: Create a snow golem shopkeeper
+        default: true

@@ -6,7 +6,7 @@
 	<packaging>jar</packaging>
 
 	<name>Shopkeepers</name>
-	<version>1.16-SNAPSHOT</version>
+	<version>1.16.8i-SNAPSHOT</version>
 
 	<url>https://github.com/nisovin/Shopkeepers</url>
 
@@ -69,59 +69,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.nisovin.shopkeepers</groupId>
-			<artifactId>sk-v1_6_R3</artifactId>
-			<version>v1_6_R3</version>
-			<type>jar</type>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bukkit</groupId>
-					<artifactId>craftbukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.nisovin.shopkeepers</groupId>
-					<artifactId>sk-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.nisovin.shopkeepers</groupId>
-			<artifactId>sk-v1_7_R1</artifactId>
-			<version>v1_7_R1</version>
-			<type>jar</type>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bukkit</groupId>
-					<artifactId>craftbukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.nisovin.shopkeepers</groupId>
-					<artifactId>sk-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.nisovin.shopkeepers</groupId>
-			<artifactId>sk-v1_7_R3</artifactId>
-			<version>v1_7_R3</version>
-			<type>jar</type>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bukkit</groupId>
-					<artifactId>craftbukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.nisovin.shopkeepers</groupId>
-					<artifactId>sk-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.nisovin.shopkeepers</groupId>
-			<artifactId>sk-v1_7_R4</artifactId>
-			<version>v1_7_R4</version>
+			<artifactId>sk-v1_8_R1</artifactId>
+			<version>v1_8_R1</version>
 			<type>jar</type>
 			<optional>true</optional>
 			<exclusions>

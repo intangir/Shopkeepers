@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.nisovin.shopkeepers.EditorClickResult;
 import com.nisovin.shopkeepers.Settings;
@@ -122,6 +123,36 @@ public class TradingPlayerShopkeeper extends PlayerShopkeeper {
 
 	@Override
 	protected boolean onPlayerEdit(Player player) {
+		
+		if(player.getItemInHand().getType() == Settings.nameItem && Settings.enablePlayerShopSetName) {
+			
+			ItemStack stack = player.getItemInHand();
+			ItemMeta im = stack.getItemMeta();
+			
+			if(!im.hasDisplayName()) {
+				// remove name
+				setName("");
+			} else {
+				String newName = im.getDisplayName();
+				// validate name
+				if (!newName.matches("^" + Settings.nameRegex + "$")) {
+					player.sendMessage(Settings.msgNameInvalid);
+					return false;
+				}
+				// set name
+				if (newName.length() > 32) {
+					setName(newName.substring(0, 32));
+				} else {
+					setName(newName);
+				}
+			}
+			stack.setAmount(stack.getAmount() - 1);
+			player.setItemInHand(stack);
+			return true;
+			
+		}
+		
+		
 		Inventory inv = Bukkit.createInventory(player, 27, Settings.editorTitle);
 		
 		// add the sale types

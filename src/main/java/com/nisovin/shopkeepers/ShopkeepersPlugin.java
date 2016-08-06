@@ -30,10 +30,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -157,6 +160,9 @@ public class ShopkeepersPlugin extends JavaPlugin {
 		}
 		if (Settings.enableCreeperShops) {
 			pm.registerEvents(new CreeperListener(this), this);
+		}
+		if (Settings.enableSnowGolemShops) {
+			pm.registerEvents(new SnowGolemListener(this), this);
 		}
 		if (Settings.blockVillagerSpawns) {
 			pm.registerEvents(new BlockSpawnListener(), this);
@@ -304,8 +310,7 @@ public class ShopkeepersPlugin extends JavaPlugin {
 			
 		} else if (sender instanceof Player) {
 			Player player = (Player)sender;
-			@SuppressWarnings("deprecation")
-			Block block = player.getTargetBlock(null, 10); // TODO: fix this when API becomes available
+			Block block = player.getTargetBlock((Set<Material>)null, 10); // TODO: fix this when API becomes available
 			
 			// transfer ownership
 			if (args.length == 2 && args[0].equalsIgnoreCase("transfer") && player.hasPermission("shopkeeper.transfer")) {
@@ -438,6 +443,8 @@ public class ShopkeepersPlugin extends JavaPlugin {
 								shopObjType = ShopObjectType.WITCH;
 							} else if (args[0].toLowerCase().equals("creeper") && Settings.enableCreeperShops) {
 								shopObjType = ShopObjectType.CREEPER;
+							} else if (args[0].toLowerCase().equals("snowgolem") && Settings.enableSnowGolemShops) {
+								shopObjType = ShopObjectType.SNOWGOLEM;
 							}
 						}
 						if (args.length >= 2) {
@@ -449,6 +456,8 @@ public class ShopkeepersPlugin extends JavaPlugin {
 								shopObjType = ShopObjectType.WITCH;
 							} else if (args[1].equalsIgnoreCase("creeper") && Settings.enableCreeperShops) {
 								shopObjType = ShopObjectType.CREEPER;
+							} else if (args[1].equalsIgnoreCase("snowgolem") && Settings.enableSnowGolemShops) {
+								shopObjType = ShopObjectType.SNOWGOLEM;
 							}
 						}
 						if (shopType != null && !shopType.hasPermission(player)) {
@@ -476,6 +485,8 @@ public class ShopkeepersPlugin extends JavaPlugin {
 							shopObjType = ShopObjectType.WITCH;
 						} else if (args[0].equals("creeper") && Settings.enableCreeperShops) {
 							shopObjType = ShopObjectType.CREEPER;
+						} else if (args[0].equals("snowgolem") && Settings.enableSnowGolemShops) {
+							shopObjType = ShopObjectType.SNOWGOLEM;
 						}
 					}
 					Shopkeeper shopkeeper = createNewAdminShopkeeper(loc, shopObjType.createObject());
@@ -671,7 +682,7 @@ public class ShopkeepersPlugin extends JavaPlugin {
 	}
 	
 	void handleShopkeeperInteraction(Player player, Shopkeeper shopkeeper) {
-		if (shopkeeper != null && player.isSneaking()) {
+		if (shopkeeper != null && player.isSneaking() || player.getItemInHand().getType() == Settings.nameItem) {
 			// modifying a shopkeeper
 			ShopkeepersPlugin.debug("  Opening editor window...");
 			boolean isEditing = shopkeeper.onEdit(player);
@@ -705,7 +716,7 @@ public class ShopkeepersPlugin extends JavaPlugin {
 	
 	// returns false, if the player wasn't able to hire this villager
 	@SuppressWarnings("deprecation") // because of player.updateInventory()
-	boolean handleHireOtherVillager(Player player, Villager villager) {
+	boolean handleHireOtherNpc(Player player, LivingEntity entity) {
 		// hire him if holding his hiring item
 		ItemStack inHand = player.getItemInHand();
 		if (inHand != null && inHand.getType() == Settings.hireItem) {
@@ -715,6 +726,19 @@ public class ShopkeepersPlugin extends JavaPlugin {
 			if (costs > 0) {
 				if (this.hasInventoryItemsAtLeast(inventory, Settings.hireItem, costs)) {
 					debug("  Villager hiring: the player has the needed amount of hiring items");
+
+					
+					// check if the player has access to remove the entity (incase its protected by another mod)
+					if (Settings.requireEntityAccess) {
+						EntityDamageByEntityEvent testEvent = new TestEntityDamageByEntityEvent(player, entity, DamageCause.CUSTOM, 1);
+						plugin.getServer().getPluginManager().callEvent(testEvent);
+						if (testEvent.isCancelled()) {
+							plugin.sendMessage(player, Settings.msgCantHire);
+							return false;
+						}
+					}
+
+					// complete the transaction
 					int inHandAmount = inHand.getAmount();
 					int remaining = inHandAmount - costs;
 					debug("  Villager hiring: in hand=" + inHandAmount + " costs=" + costs + " remaining=" + remaining);
@@ -737,11 +761,11 @@ public class ShopkeepersPlugin extends JavaPlugin {
 			ItemStack creationItem = Settings.createCreationItem();
 			HashMap<Integer, ItemStack> remaining = inventory.addItem(creationItem);
 			if (!remaining.isEmpty()) {
-				villager.getWorld().dropItem(villager.getLocation(), creationItem);
+				entity.getWorld().dropItem(entity.getLocation(), creationItem);
 			}
 
 			// remove the npc
-			villager.remove();
+			entity.remove();
 			
 			// update client's inventory
 			player.updateInventory();
@@ -749,7 +773,7 @@ public class ShopkeepersPlugin extends JavaPlugin {
 			sendMessage(player, Settings.msgHired);
 			return true;
 		} else {
-			sendMessage(player, Settings.msgVillagerForHire.replace("{costs}", String.valueOf(Settings.hireOtherVillagersCosts)).replace("{hire-item}", Settings.hireItem.toString()));
+			//sendMessage(player, Settings.msgVillagerForHire.replace("{costs}", String.valueOf(Settings.hireOtherVillagersCosts)).replace("{hire-item}", Settings.hireItem.toString()));
 		}
 		return false;
 	}
