@@ -206,7 +206,7 @@ public class ShopkeepersPlugin extends JavaPlugin implements ShopkeepersAPI {
 		pm.registerEvents(new CreateListener(this), this);
 		pm.registerEvents(new VillagerInteractionListener(this), this);
 		pm.registerEvents(new LivingEntityShopListener(this), this);
-
+		
 		if (Settings.enableSignShops) {
 			this.signShopListener = new SignShopListener(this);
 			pm.registerEvents(signShopListener, this);
@@ -230,6 +230,10 @@ public class ShopkeepersPlugin extends JavaPlugin implements ShopkeepersAPI {
 		if (Settings.bypassSpawnBlocking) {
 			creatureForceSpawnListener = new CreatureForceSpawnListener();
 			Bukkit.getPluginManager().registerEvents(creatureForceSpawnListener, this);
+		}
+
+		if (Settings.replaceVillagerEggsWithCreationItem) {
+			pm.registerEvents(new SpawnEggListener(this), this);
 		}
 
 		// register command handler:

@@ -49,6 +49,7 @@ public class Settings {
 	public static List<String> shopCreationItemLore = new ArrayList<String>(0);
 	public static boolean preventShopCreationItemRegularUsage = false;
 	public static boolean deletingPlayerShopReturnsCreationItem = false;
+	public static boolean replaceVillagerEggsWithCreationItem = false;
 
 	public static List<String> enabledLivingShops = Arrays.asList(
 			EntityType.VILLAGER.name(), EntityType.COW.name(),

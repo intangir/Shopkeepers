@@ -35,6 +35,7 @@ shop-creation-item-name: ""
 shop-creation-item-lore: []
 prevent-shop-creation-item-regular-usage: false
 deleting-player-shop-returns-creation-item: false
+replace-villager-eggs-with-creation-item: false
 
 enabled-living-shops:
 - VILLAGER
