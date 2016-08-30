@@ -25,12 +25,12 @@ class SpawnEggListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	void onPlayerInteract(PlayerInteractEvent event) {
-		if(event.getMaterial() == Material.MONSTER_EGG && !event.getPlayer().isOp() && event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+		if (event.getMaterial() == Material.MONSTER_EGG && !event.getPlayer().isOp() && event.getPlayer().getGameMode() != GameMode.CREATIVE) {
 			// this magic string is apparently a villager egg for some reason..
-			if(event.getItem().toString().contains("internal=H4sIAAAAAAAAAONiYOBi4HTNK8ksqQxJTOdgYMpMYeAIy8zJSUxPLWJgAADlEwUxIAAAAA==")) {
+			if (event.getItem().toString().contains("internal=H4sIAAAAAAAAAONiYOBi4HTNK8ksqQxJTOdgYMpMYeAIy8zJSUxPLWJgAADlEwUxIAAAAA==")) {
 				event.setCancelled(true);
 
-				if(!NMSManager.getProvider().isMainHandInteraction(event)) {
+				if (!NMSManager.getProvider().isMainHandInteraction(event)) {
 					return;
 				}
 
@@ -40,7 +40,7 @@ class SpawnEggListener implements Listener {
 				newItems.setAmount(amount);
 
 				Utils.sendMessage(player, "replacing " + amount + " villager egg(s) with " + amount + " " + Settings.shopCreationItemName + "(s)");
-				
+
 				Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 					@Override
 					public void run() {
